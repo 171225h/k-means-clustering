@@ -9,5 +9,3 @@
 
 
 
-
-112번째 줄에서 NullPointException이 발생됨.
