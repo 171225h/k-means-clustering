@@ -1,51 +1,70 @@
 package test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
 public class K_means_clustering {
-
+	static Scanner input = new Scanner(System.in);
+	static int k;
+	static Cluster clus;
+	
 	public static void main(String[] args) {
-		Scanner input = new Scanner(System.in);
 
-		int k = Integer.parseInt(input.nextLine());					// í´ëŸ¬ìŠ¤í„° ê°œìˆ˜
-		ArrayList<int[]> c = new ArrayList<>();		// n-vectorë“¤ì„ ì €ì¥í•  ê·¸ë£¹ c, cì˜ ìˆ˜ëŠ” kë³´ë‹¤ í¬ê±°ë‚˜ ê°™ë‹¤.
-		int[][] z = new int[k][];					// ê° í´ëŸ¬ìŠ¤í„°ì˜ ëŒ€í‘œê°’ë“¤
-		boolean end = false;						// z_iê°’ë“¤ì´ ë°”ë€Œë©´ false, ë°”ë€Œì§€ì•Šìœ¼ë©´ false
-		double[][] j = new double[k][2];			// j_i 0ì—´ì€ ||x_i-z_j||^2ê°’ë“¤ 1ì—´ì€ j_iì— ì†í•˜ëŠ” n-vector ìˆ˜
 
-		while(input.hasNextLine()) {	// n-vectorë¥¼ ë°›ì•„ë“œë¦¼ 
-			int[] x = new int[50];
+		k = Integer.parseInt(input.nextLine());		// Å¬·¯½ºÅÍ °³¼ö
+		ArrayList<int[]> c = new ArrayList<>();		// n-vectorµéÀ» ÀúÀåÇÒ ±×·ì c, cÀÇ ¼ö´Â kº¸´Ù Å©°Å³ª °°´Ù.
+		int[][] z = new int[k][];					// °¢ Å¬·¯½ºÅÍÀÇ ´ëÇ¥°ªµé
+		boolean end = false;						// z_i°ªµéÀÌ ¹Ù²î¸é false, ¹Ù²îÁö¾ÊÀ¸¸é false
+		double[][] j = new double[k][2];			// j_i 0¿­Àº ||x_i-z_j||^2°ªµé 1¿­Àº j_i¿¡ ¼ÓÇÏ´Â n-vector ¼ö
+		clus = new Cluster(k);
+		
+		while(input.hasNextLine()) {	// n-vector¸¦ ¹Ş¾Æµå¸² 
 			String s = input.nextLine();
 			if(s.equals(""))
 				break;
+			
+			int vector_size = s.split(" ").length;
 			StringTokenizer st = new StringTokenizer(s);
-
+			
+			int[] x = new int[vector_size];
+			
 			for(int i = 0; st.hasMoreTokens(); i++)
 				x[i]=Integer.parseInt(st.nextToken());
 
 			c.add(x);
 		}
 
-		int[] cIndex = new int[c.size()];			// n-vector xê°€ ì–´ëŠ ê·¸ë£¹ì— ì†í•´ìˆëŠ”ì§€ ì•Œë ¤ì¤Œ
+		int[] cIndex = new int[c.size()];			// n-vector x°¡ ¾î´À ±×·ì¿¡ ¼ÓÇØÀÖ´ÂÁö ¾Ë·ÁÁÜ
 
-		// ì²˜ìŒì—” ì•„ë¬´ ìˆ˜ë‚˜ ëŒ€í‘¯ê°’ìœ¼ë¡œ ì„¤ì •.
+		// Ã³À½¿£ ¾Æ¹« ¼ö³ª ´ëÇ©°ªÀ¸·Î ¼³Á¤.
 		for(int i = 0; i<k; i++)
 			z[i]=c.get(i);
 
+		// z_i°ªÀÌ º¯ÇÏÁö ¾ÊÀ»¶§±îÁö µ¹¸°´Ù.
 		while(!end) {
 			chooseJ(c, cIndex, z, j);
 			int[][] newZ = new int[k][];
 			re_representation(newZ, c, cIndex, k);			
 
-			
+
 			end = !diffrent(z, newZ);
+			if(diffrent(z, newZ))
+				z = newZ.clone();
 		}
 
-		for(int i = 0; i<cIndex.length; i++)
-			System.out.print(cIndex[i]+" ");
-
+		// °¢ cluster¿¡ µé¾îÀÖ´Â xº¤ÅÍµéÀ» º¸¿©Áà
+		for(int i = 0; i<k; i++) {
+			System.out.print("Cluster "+i+" = ");
+			ArrayList<int[]> cluster = clus.getClusterEntry(i);
+			
+			for(int n = 0; n<cluster.size(); n++) {
+				int[] vector = cluster.get(n);
+				System.out.print(Arrays.toString(vector));
+			}
+			System.out.println();
+		}
 	}
 
 
@@ -83,38 +102,32 @@ public class K_means_clustering {
 	}
 
 	public static void re_representation(int[][] z, ArrayList<int[]> c, int[] cIndex, int k) {
-		int[][][] cluster = new int[k][][];
 
-		for(int i = 0; i<cIndex.length; i++)
-			System.out.print(cIndex[i]+" ");
-		System.out.println();
+		clus = new Cluster(k);
 		
-		int n = 0;
 		for(int i = 0; i<k; i++) {
-			int[][] group = new int[c.size()][];
 			for(int j = 0; j<cIndex.length; j++) {
 				if(cIndex[j]==i)
-					group[n++]=c.get(j);
+					clus.chooseCluster(i, c.get(j));
 			}
-			cluster[i] = group;
 		}
 
-		makeMean(cluster, z);
-
+		clus.makeMean(z);
+			
 	}
 
-	public static void makeMean(int[][][] cluster, int[][] z) {
-
-		for(int i = 0; i<cluster.length; i++) {
-			int[] mean = new int[cluster[0][0].length];
-			for(int j = 0; j<cluster[i].length; j++) {
-				for(int k = 0; k<cluster[0][0].length; k++) {
-					mean[j]+=cluster[i][j][k];
-				}
-			}
-			z[i]=mean;
-		}
-	}
+//	public static void makeMean(int[][][] cluster, int[][] z) {
+//
+//		for(int i = 0; i<cluster.length; i++) {
+//			int[] mean = new int[cluster[0][0].length];
+//			for(int j = 0; j<cluster[i].length; j++) {
+//				for(int k = 0; k<cluster[0][0].length; k++) {
+//					mean[j]+=cluster[i][j][k];
+//				}
+//			}
+//			z[i]=mean;
+//		}
+//	}
 
 	public static boolean diffrent (int[][] z, int[][] newZ) {
 		for(int i = 0; i<z.length; i++) {
@@ -127,4 +140,81 @@ public class K_means_clustering {
 		return false;
 	}
 
+}
+
+class Cluster{
+
+	ArrayList<int[]>[] clusters;
+
+	public Cluster(int k){
+		clusters = new ArrayList[k];
+	
+		for(int i = 0; i<k; i++) {
+			ArrayList<int[]> a = new ArrayList<>();
+			clusters[i]=a;
+		}
+	}
+	
+	
+	public void chooseCluster(int i, int[] x) {
+		clusters[i].add(x);
+	}
+	
+	public void makeMean(int[][] z) {
+		
+		int vector_size = clusters[0].get(0).length;
+		
+		for(int i = 0; i<clusters.length; i++) {
+			
+			
+			int[] mean = new int[vector_size];
+			
+			// °¢°¢ÀÇ Cluster¾È¿¡ x°ªµéÀÇ ¿ä¼ÒÀÇ ÇÕ
+			for(int j = 0; j<clusters[i].size(); j++) {
+				for(int k = 0; k<vector_size; k++) {
+					mean[k]+=clusters[i].get(j)[k];
+				}
+			}
+			
+			// Cluster mean ±¸ÇÏ±â
+			for(int j = 0; j<vector_size; j++) {
+				mean[j] /= clusters[i].size();
+			}			
+			
+			z[i] = mean;
+		}
+		
+		
+//		for(int i = 0; i<clusters.length; i++) {
+//			int[] mean = new int[cluster[0][0].length];
+//			for(int j = 0; j<cluster[i].length; j++) {
+//				for(int k = 0; k<cluster[0][0].length; k++) {
+//					mean[j]+=cluster[i][j][k];
+//				}
+//			}
+//			z[i]=mean;
+//		}
+	}
+
+
+	public ArrayList<int[]> getClusterEntry(int n){
+		return clusters[n];
+	}
+	
+	@Override
+	public String toString() {
+		String result = "";
+		for(int i = 0; i < clusters.length; i++) {
+			ArrayList<int[]> cluster = clusters[i];
+			
+			result += String.format("Cluster %d : ", i);
+			for(int n = 0; n<cluster.size(); n++) {
+				int[] vector = cluster.get(n);
+				result += Arrays.toString(vector);
+			}
+			result += "\n";
+		}
+		
+		return result;
+	}
 }
