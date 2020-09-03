@@ -13,14 +13,14 @@ public class K_means_clustering {
 	public static void main(String[] args) {
 
 
-		k = Integer.parseInt(input.nextLine());		// Å¬·¯½ºÅÍ °³¼ö
-		ArrayList<int[]> c = new ArrayList<>();		// n-vectorµéÀ» ÀúÀåÇÒ ±×·ì c, cÀÇ ¼ö´Â kº¸´Ù Å©°Å³ª °°´Ù.
-		int[][] z = new int[k][];					// °¢ Å¬·¯½ºÅÍÀÇ ´ëÇ¥°ªµé
-		boolean end = false;						// z_i°ªµéÀÌ ¹Ù²î¸é false, ¹Ù²îÁö¾ÊÀ¸¸é false
-		double[][] j = new double[k][2];			// j_i 0¿­Àº ||x_i-z_j||^2°ªµé 1¿­Àº j_i¿¡ ¼ÓÇÏ´Â n-vector ¼ö
+		k = Integer.parseInt(input.nextLine());		// í´ëŸ¬ìŠ¤í„° ê°œìˆ˜
+		ArrayList<int[]> c = new ArrayList<>();		// n-vectorë“¤ì„ ì €ì¥í•  ê·¸ë£¹ c, cì˜ ìˆ˜ëŠ” kë³´ë‹¤ í¬ê±°ë‚˜ ê°™ë‹¤.
+		int[][] z = new int[k][];					// ê° í´ëŸ¬ìŠ¤í„°ì˜ ëŒ€í‘œê°’ë“¤
+		boolean end = false;						// z_iê°’ë“¤ì´ ë°”ë€Œë©´ false, ë°”ë€Œì§€ì•Šìœ¼ë©´ false
+		double[][] j = new double[k][2];			// j_i 0ì—´ì€ ||x_i-z_j||^2ê°’ë“¤ 1ì—´ì€ j_iì— ì†í•˜ëŠ” n-vector ìˆ˜
 		clus = new Cluster(k);
 		
-		while(input.hasNextLine()) {	// n-vector¸¦ ¹Ş¾Æµå¸² 
+		while(input.hasNextLine()) {	// n-vectorë¥¼ ë°›ì•„ë“œë¦¼ 
 			String s = input.nextLine();
 			if(s.equals(""))
 				break;
@@ -36,13 +36,13 @@ public class K_means_clustering {
 			c.add(x);
 		}
 
-		int[] cIndex = new int[c.size()];			// n-vector x°¡ ¾î´À ±×·ì¿¡ ¼ÓÇØÀÖ´ÂÁö ¾Ë·ÁÁÜ
+		int[] cIndex = new int[c.size()];			// n-vector xê°€ ì–´ëŠ ê·¸ë£¹ì— ì†í•´ìˆëŠ”ì§€ ì•Œë ¤ì¤Œ
 
-		// Ã³À½¿£ ¾Æ¹« ¼ö³ª ´ëÇ©°ªÀ¸·Î ¼³Á¤.
+		// ì²˜ìŒì—” ì•„ë¬´ ìˆ˜ë‚˜ ëŒ€í‘¯ê°’ìœ¼ë¡œ ì„¤ì •.
 		for(int i = 0; i<k; i++)
 			z[i]=c.get(i);
 
-		// z_i°ªÀÌ º¯ÇÏÁö ¾ÊÀ»¶§±îÁö µ¹¸°´Ù.
+		// z_iê°’ì´ ë³€í•˜ì§€ ì•Šì„ë•Œê¹Œì§€ ëŒë¦°ë‹¤.
 		while(!end) {
 			chooseJ(c, cIndex, z, j);
 			int[][] newZ = new int[k][];
@@ -54,7 +54,7 @@ public class K_means_clustering {
 				z = newZ.clone();
 		}
 
-		// °¢ cluster¿¡ µé¾îÀÖ´Â xº¤ÅÍµéÀ» º¸¿©Áà
+		// ê° clusterì— ë“¤ì–´ìˆëŠ” xë²¡í„°ë“¤ì„ ë³´ì—¬ì¤˜!
 		for(int i = 0; i<k; i++) {
 			System.out.print("Cluster "+i+" = ");
 			ArrayList<int[]> cluster = clus.getClusterEntry(i);
@@ -169,14 +169,14 @@ class Cluster{
 			
 			int[] mean = new int[vector_size];
 			
-			// °¢°¢ÀÇ Cluster¾È¿¡ x°ªµéÀÇ ¿ä¼ÒÀÇ ÇÕ
+			// ê°ê°ì˜ Clusterì•ˆì— xê°’ë“¤ì˜ ìš”ì†Œì˜ í•©
 			for(int j = 0; j<clusters[i].size(); j++) {
 				for(int k = 0; k<vector_size; k++) {
 					mean[k]+=clusters[i].get(j)[k];
 				}
 			}
 			
-			// Cluster mean ±¸ÇÏ±â
+			// Cluster mean êµ¬í•˜ê¸°
 			for(int j = 0; j<vector_size; j++) {
 				mean[j] /= clusters[i].size();
 			}			
